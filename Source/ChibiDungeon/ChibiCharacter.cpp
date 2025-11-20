@@ -5,6 +5,8 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraActor.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AChibiCharacter::AChibiCharacter()
@@ -14,8 +16,12 @@ AChibiCharacter::AChibiCharacter()
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 	
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	RootComponent = Root;
+	bUseControllerRotationYaw = false;
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->bOrientRotationToMovement = true;
+		MovementComponent->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -34,9 +40,6 @@ void AChibiCharacter::BeginPlay()
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		InputMode.SetHideCursorDuringCapture(false);
 		PlayerController->SetInputMode(InputMode);
-		
-		PlayerController->SetViewTarget(CameraActor);
-		PlayerController->bAutoManageActiveCameraTarget = false;
 		
 		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
 		{
@@ -65,7 +68,7 @@ void AChibiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	{
 		if (MoveToAction)
 		{
-			enhancedInputComponent->BindAction(MoveToAction, ETriggerEvent::Started, this, &AChibiCharacter::OnMoveToAction);
+			enhancedInputComponent->BindAction(MoveToAction, ETriggerEvent::Triggered, this, &AChibiCharacter::OnMoveToAction);
 			UE_LOG(LogTemp, Log, TEXT("Bound MoveToAction on %s"), *GetName());
 		}
 		else
@@ -82,20 +85,22 @@ void AChibiCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 // Called every frame
 void AChibiCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	 Super::Tick(DeltaTime);
 
-	FVector Delta = TargetLocation - GetActorLocation();
-	Delta.Z = 0.0f;
-
-	if (Delta.Size() < 1.0f)
-		return;
-
-	FVector Direction = Delta.GetSafeNormal();
-	FVector NewPosition = GetActorLocation() + Direction * DeltaTime * Speed;
-	UE_LOG(LogTemp, Log, TEXT("Moving from %s to %s."), *NewPosition.ToString(), *GetActorLocation().ToString())
-	SetActorLocation(NewPosition);
-	//FVector NewPosition = GetActorLocation() + Delta.GetSafeNormal() * Delta.Size();
-	//SetActorLocation(NewPosition);
+	 FVector Delta = TargetLocation - GetCapsuleComponent()->GetComponentLocation();
+	 Delta.Z = 0.0f;
+	
+	 if (bMovingToLocation && Delta.Size() < 10.0f)
+	 {
+	 	bMovingToLocation = false;
+	 	UE_LOG(LogTemp, Log, TEXT("Reached Target Location")); 
+	 }
+	 else if (bMovingToLocation)
+	 {
+	 	FVector Direction = Delta.GetSafeNormal();
+	 	AddMovementInput(Direction);
+	 	UE_LOG(LogTemp, Log, TEXT("Moving to Target Location (%s)"), *Delta.ToString()); 
+	 }
 }
 
 bool AChibiCharacter::GetMouseRayHitOnGround(FVector& hit)
@@ -133,6 +138,7 @@ void AChibiCharacter::OnMoveToAction(const FInputActionValue& Value)
 	FVector Hit;
 	if (GetMouseRayHitOnGround(Hit))
 	{
+		bMovingToLocation = true;
 		TargetLocation = Hit;
 	}
 }
