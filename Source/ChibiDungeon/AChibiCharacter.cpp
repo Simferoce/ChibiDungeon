@@ -2,6 +2,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 // Sets default values
 AChibiCharacter::AChibiCharacter()
@@ -44,8 +45,10 @@ void AChibiCharacter::Tick(float DeltaTime)
 
 void AChibiCharacter::MoveTo(const FVector& Destination)
 {
-	TargetLocation = Destination;
-	bMovingToLocation = true;
-	UE_LOG(LogTemp, Log, TEXT("MoveTo called on %s -> %s"), *GetName(), *Destination.ToString());
-	DrawDebugSphere(GetWorld(), Destination, 10.0f, 12, FColor::Red, false, 1.0f);
+	 UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), Destination);
+	
+	 // TargetLocation = Destination;
+	 // bMovingToLocation = true;
+	 // UE_LOG(LogTemp, Log, TEXT("MoveTo called on %s -> %s"), *GetName(), *Destination.ToString());
+	 // DrawDebugSphere(GetWorld(), Destination, 10.0f, 12, FColor::Red, false, 1.0f);
 }
