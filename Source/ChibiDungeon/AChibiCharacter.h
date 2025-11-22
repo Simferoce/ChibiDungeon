@@ -8,11 +8,4 @@ UCLASS(Blueprintable)
 class CHIBIDUNGEON_API AChibiCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-public:
-	AChibiCharacter();
-
-protected:
-	virtual void BeginPlay() override;
-
 };
