@@ -4,7 +4,7 @@
 #include "GameFramework/Character.h"
 #include "AChibiCharacter.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class CHIBIDUNGEON_API AChibiCharacter : public ACharacter
 {
 	GENERATED_BODY()
