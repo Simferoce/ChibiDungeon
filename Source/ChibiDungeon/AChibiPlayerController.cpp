@@ -4,6 +4,7 @@
 #include "AChibiCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "DrawDebugHelpers.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 void AChibiPlayerController::BeginPlay()
 {
@@ -78,11 +79,5 @@ void AChibiPlayerController::OnMoveToAction(const FInputActionValue& Value)
 
     DrawDebugSphere(GetWorld(), Hit, 10.0f, 12, FColor::Green, false, 1.0f);
 
-    if (APawn* P = GetPawn())
-    {
-        if (AChibiCharacter* Ch = Cast<AChibiCharacter>(P))
-        {
-            Ch->MoveTo(Hit);
-        }
-    }
+    UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, Hit);
 }
