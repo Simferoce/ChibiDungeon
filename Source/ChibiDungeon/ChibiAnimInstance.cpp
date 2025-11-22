@@ -1,5 +1,5 @@
 #include "ChibiAnimInstance.h"
-#include "ChibiCharacter.h"
+#include "AChibiCharacter.h"
 #include "GameFramework/Pawn.h"
 
 void UChibiAnimInstance::NativeInitializeAnimation()
